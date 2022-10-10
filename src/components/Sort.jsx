@@ -1,4 +1,22 @@
-function Sort() {
+import { useState } from "react";
+
+function Sort({value, onClickSortType}) {
+    const [open, setOpen] = useState(false);
+
+    const list = [
+        {name: 'популярности по убыванию', sortProperty: 'rating'}, 
+        {name: 'популярности по возрастанию', sortProperty: '-rating'}, 
+        {name: 'цене по убыванию', sortProperty: 'price'}, 
+        {name: 'цене по возрастанию', sortProperty: '-price'}, 
+        {name: 'алфавиту по убыванию', sortProperty: 'title'},
+        {name: 'алфавиту по возрастанию', sortProperty: '-title'}
+    ];
+
+    const onClickSortItem = (index) => {
+        onClickSortType(index);
+        setOpen(false);
+    };
+
     return (
         <div className="sort">
             <div className="sort__label">
@@ -15,15 +33,25 @@ function Sort() {
                     />
                 </svg>
                 <b>Сортировка по:</b>
-                <span>популярности</span>
+                <span onClick={() => setOpen(!open)}>{value.name}</span>
             </div>
-            <div className="sort__popup">
-                <ul>
-                    <li className="active">популярности</li>
-                    <li>цене</li>
-                    <li>алфавиту</li>
-                </ul>
-            </div>
+            {/* ========== Условный рендеринг =========== */}
+            {open && (
+                <div className="sort__popup">
+                    <ul>
+                        {list.map((obj, i) => 
+                            <li 
+                                key={i}
+                                onClick={() => onClickSortItem(obj)} 
+                                className={value.sortProperty === obj.sortProperty ? 'active' : ''}
+                            >
+                                {obj.name}
+                            </li>
+                        )}
+                    </ul>
+                </div>
+            )}
+            {/* ========================================= */}
         </div>
     );
 }
