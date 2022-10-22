@@ -1,14 +1,32 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
+import debounce from 'lodash.debounce';
 import { SearchContext } from '../../App';
 
 import styles from './Search.module.scss';
 
 const Search = () => {
-  const { searchValue, setSearchValue } = useContext(SearchContext);
+  const [value, setValue] = useState('');
+  const { setSearchValue } = useContext(SearchContext);
+  const inputRef = useRef(); // хук для обращения к ДОМ элементам
 
   const onClickClear = () => {
     setSearchValue('');
-    document.querySelector('input').focus();
+    setValue('');
+    inputRef.current.focus(); //оставляет курсор активным
+  };
+
+  const updateSearchValue = useCallback(
+    //этот хук сохраняет ссылку на функцию и она заново не пересоздается каждый раз
+    debounce((str) => {
+      //debounce это типа сеттаймаута, делает задержку в выполнении функции
+      setSearchValue(str);
+    }, 500),
+    [],
+  );
+
+  const onChangeInput = (event) => {
+    setValue(event.target.value);
+    updateSearchValue(event.target.value);
   };
 
   return (
@@ -20,12 +38,13 @@ const Search = () => {
         </g>
       </svg>
       <input
-        value={searchValue} //контролируемый инпут, благодаря передаче value
-        onChange={(event) => setSearchValue(event.target.value)}
+        ref={inputRef}
+        value={value} //контролируемый инпут, благодаря передаче value
+        onChange={(event) => onChangeInput(event)}
         className={styles.input}
         placeholder="Поиск пиццы ..."
       />
-      {searchValue && (
+      {value && (
         <svg
           onClick={() => onClickClear()}
           className={styles.icon__close}
